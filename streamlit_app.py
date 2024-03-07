@@ -3,6 +3,10 @@ import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 
+import datetime
+from datetime import datetime
+
+
 # Загрузка данных из CSV файла
 @st.cache
 def load_data(filename):
@@ -62,16 +66,42 @@ def main():
     # Отображение соответствующей вкладки
     if choice == 'Аналитика данных':
         # Загрузка данных из CSV файла
-        filename = st.file_uploader("Загрузите ваш файл CSV", type=['csv'])
-        if filename is not None:
-            df = load_data(filename)
-            # Выводим датасет
-            st.subheader('Датасет:')
-            st.write(df)
-            
-            # Выводим статистику по датасету
-            st.subheader('Статистика по датасету:')
-            st.write(df.describe())
+        filename = 'final_verse.csv'
+        df = load_data(filename)
+        # Выводим датасет
+        st.markdown('Датасет:')
+        st.write(df)
+        
+        # Выводим статистику по датасету
+        st.subheader('Статистика по датасету:')
+        st.write(df.describe())
+
+        # Создаем колонку с шириной 100%
+        cols = st.columns(1)
+
+        with cols[0]:
+            st.header('Самые просматриваемые посты')
+    # Выпадающий список для выбора категории
+            category = st.selectbox('Выберите категорию', df['Category'].unique())
+    # Фильтрация датафрейма по выбранной категории
+            filtered_df = df[df['Category'] == category]
+    # Сортировка по количеству просмотров и выборка 5 самых популярных постов
+            top_posts = filtered_df.sort_values(by='Views', ascending=False).head(5)
+    
+            for index, row in top_posts.iterrows():
+                post_text = row['Text']
+                post_date = row['Data'] + ' ' + row['Time']
+        # Преобразование строки даты и времени в объект datetime
+                post_datetime = datetime.strptime(post_date, '%Y-%m-%d %H:%M:%S')
+        # Форматирование даты и времени
+                formatted_date = post_datetime.strftime('%d %B %H:%M')
+        
+        # Создание строки с текстом поста и датой публикации
+                post_with_date = f"{post_text}\n\nДата публикации: {formatted_date}"
+        
+        # Вывод текста поста с закругленной обводкой и датой публикации
+                st.markdown(f'<div style="border: 1px solid white; padding: 10px; margin-bottom: 10px; border-radius: 10px; box-sizing: border-box;">{post_with_date}</div>', unsafe_allow_html=True)
+
     elif choice == 'Проверка модели':
         st.subheader('Проверка модели BERT:')
         # Загрузка модели и токенизатора
