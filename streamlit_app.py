@@ -2,10 +2,37 @@ import streamlit as st
 import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
-
 import datetime
 from datetime import datetime
+import base64
+# Установка конфигурации страницы в самом начале скрипта
+st.set_page_config(layout="wide")
 
+
+def image_local(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode() # Кодируем изображение в base64 и декодируем в строку
+    st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: url(data:image/png;base64,{encoded_string});
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+    )
+
+
+# Установка фонового изображения
+image_local('static/image/fon.png') # Указываем путь к вашему изображению
+
+st.markdown('<style>div[class="st-emotion-cache-1cypcdb eczjsme11"] {color:black !important; background: url("static/image/fon.png") !important;background-repeat: no-repeat !important;background-size:350% !important;} </style>', unsafe_allow_html=True)
+
+# Создание боковой панели с карточками
 
 # Загрузка данных из CSV файла
 @st.cache
@@ -37,6 +64,7 @@ label_to_category = {
     12: 'Факты'
 }
 
+
 # Функция для предсказания категории текста
 def predict_category(text, tokenizer, model):
     # Токенизируем текст
@@ -55,7 +83,11 @@ def predict_category(text, tokenizer, model):
 
 # Главный код Streamlit
 def main():
-    st.set_page_config(layout="wide")
+
+
+
+    
+
 
     st.title('Веб-сервис анализа данных и текстов с BERT')
 
@@ -97,10 +129,10 @@ def main():
                 formatted_date = post_datetime.strftime('%d %B %H:%M')
         
         # Создание строки с текстом поста и датой публикации
-                post_with_date = f"{post_text}\n\nДата публикации: {formatted_date}"
+                post_with_date = f"{formatted_date}\n\n{post_text}"
         
         # Вывод текста поста с закругленной обводкой и датой публикации
-                st.markdown(f'<div style="border: 1px solid white; padding: 10px; margin-bottom: 10px; border-radius: 10px; box-sizing: border-box;">{post_with_date}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="border: 1px solid white; padding: 10px; background-color: rgba(240, 240, 240, 0.2); margin-bottom: 10px; border-radius: 10px; box-sizing: border-box;">{post_with_date}</div>', unsafe_allow_html=True)
 
     elif choice == 'Проверка модели':
         st.subheader('Проверка модели BERT:')
